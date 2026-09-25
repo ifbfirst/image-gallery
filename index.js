@@ -38,10 +38,10 @@ gallery.innerHTML = '';});
 
   function openImg(data){
     
-    for (let i=0;i<16;i++){
-gallery.innerHTML += `<img src="${data.results[i].urls.regular}">`;
-
-}
+    // ДОБАВЛЕНО ИСПРАВЛЕНИЕ: data.results.length вместо 16, чтобы код не падал, если картинок меньше 16
+    for (let i=0; i < data.results.length; i++){
+      gallery.innerHTML += `<img src="${data.results[i].urls.regular}">`;
+    }
 
 }
 
@@ -54,3 +54,47 @@ reset.addEventListener('click', function(event) {
     });*/
 
 
+// ============================================================
+// НОВЫЙ КОД: УВЕЛИЧЕНИЕ ПРИ КЛИКЕ (МОДАЛЬНОЕ ОКНО)
+// ============================================================
+
+// 1. Создаем элементы модального окна прямо из JS, чтобы не править HTML
+const lightbox = document.createElement('div');
+lightbox.id = 'lightbox';
+lightbox.style.cssText = `
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+`;
+
+const lightboxImg = document.createElement('img');
+lightboxImg.style.cssText = `
+  max-width: 90%; max-height: 85vh;
+  width: auto; height: auto;
+  object-fit: contain; border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+`;
+
+lightbox.appendChild(lightboxImg);
+document.body.appendChild(lightbox);
+
+// 2. Отслеживаем клик по картинкам в галерее
+gallery.addEventListener('click', (event) => {
+  // Проверяем, что кликнули именно по картинке <img>
+  if (event.target.tagName === 'IMG') {
+    lightboxImg.src = event.target.src; // Берем адрес картинки, на которую кликнули
+    lightbox.style.opacity = '1';
+    lightbox.style.pointerEvents = 'auto';
+    document.body.style.overflow = 'hidden'; // Запрещаем прокрутку страницы
+  }
+});
+
+// 3. Закрываем окно при клике на любое место темного фона
+lightbox.addEventListener('click', () => {
+  lightbox.style.opacity = '0';
+  lightbox.style.pointerEvents = 'none';
+  document.body.style.overflow = ''; // Возвращаем прокрутку страницы
+});
